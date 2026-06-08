@@ -9,7 +9,7 @@ from __future__ import annotations
 import pprint
 import random
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Literal
 
 import numpy as np
 import torch
@@ -297,7 +297,8 @@ class HookedTransformerConfig(TransformerLensConfig):
     n_class: int = 2
     id2label: Optional[Dict] = None
     label2id: Optional[Dict] = None
-    
+    encoder_task: Literal["classification", "nsp"] = "classification"
+
     def __post_init__(self):
         # Call parent's post_init first
         super().__post_init__()
