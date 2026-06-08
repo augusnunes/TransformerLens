@@ -598,6 +598,22 @@ def convert_hf_model_config(model_name: str, **kwargs: Any) -> dict[str, Any]:
             "act_fn": "gelu",
             "attention_dir": "bidirectional",
         }
+    elif architecture == "BertForTokenClassification":
+        cfg_dict = {
+            "d_model": hf_config.hidden_size,
+            "d_head": hf_config.hidden_size // hf_config.num_attention_heads,
+            "n_heads": hf_config.num_attention_heads,
+            "d_mlp": hf_config.intermediate_size,
+            "n_layers": hf_config.num_hidden_layers,
+            "n_ctx": hf_config.max_position_embeddings,
+            "eps": hf_config.layer_norm_eps,
+            "d_vocab": hf_config.vocab_size,
+            "act_fn": "gelu",
+            "attention_dir": "bidirectional",
+            "n_class": len(hf_config.label2id),
+            "label2id": hf_config.label2id,
+            "id2label": hf_config.id2label,
+        }
     elif architecture == "MistralForCausalLM":
         use_local_attn = True if hf_config.sliding_window else False
         cfg_dict = {

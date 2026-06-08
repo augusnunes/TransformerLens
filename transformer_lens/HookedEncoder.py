@@ -405,8 +405,8 @@ class HookedEncoder(HookedRootModule):
         if "torch_dtype" in from_pretrained_kwargs:
             dtype = from_pretrained_kwargs["torch_dtype"]
 
-        official_model_name = loading.get_official_model_name(model_name)
-
+        # official_model_name = loading.get_official_model_name(model_name)
+        official_model_name = model_name
         cfg = loading.get_pretrained_model_config(
             official_model_name,
             checkpoint_index=checkpoint_index,
