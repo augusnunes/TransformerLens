@@ -27,6 +27,7 @@ from transformer_lens.components import (
     BertNSPHead,
     BertPooler,
     Unembed,
+    BertClassifier,
 )
 from transformer_lens.components.mlps.gated_mlp import GatedMLP
 from transformer_lens.config.hooked_transformer_config import HookedTransformerConfig
@@ -96,7 +97,7 @@ class HookedEncoder(HookedRootModule):
         self.unembed = Unembed(self.cfg)
         self.nsp_head = BertNSPHead(self.cfg)
         self.pooler = BertPooler(self.cfg)
-
+        self.classifier = BertClassifier(self.cfg)
         self.hook_full_embed = HookPoint()
 
         if move_to_device:
