@@ -294,7 +294,10 @@ class HookedTransformerConfig(TransformerLensConfig):
     yarn_beta_slow: float = 1.0
     yarn_original_max_position_embeddings: int = 4096
     norm_topk_prob: bool = False
-
+    n_class: int = 2
+    id2label: Optional[Dict] = None
+    label2id: Optional[Dict] = None
+    
     def __post_init__(self):
         # Call parent's post_init first
         super().__post_init__()
