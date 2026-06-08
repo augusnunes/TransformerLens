@@ -13,6 +13,7 @@ from . import loading_from_pretrained as loading
 from . import supported_models
 from .ActivationCache import ActivationCache
 from .BertNextSentencePrediction import BertNextSentencePrediction
+from .BertForTokenClassification import BertForTokenClassification
 from .cache.key_value_cache import TransformerLensKeyValueCache
 from .cache.key_value_cache_entry import TransformerLensKeyValueCacheEntry
 from .config import HookedTransformerConfig, TransformerBridgeConfig
