@@ -291,10 +291,13 @@ class HookedEncoder(HookedRootModule):
             tokens = input
 
         resid = self.encoder_output(tokens, token_type_ids, one_zero_attention_mask)
+        if self.cfg.original_architecture == "BertForTokenClassification":
+            logits = self.classifier(resid)
 
-        # MLM requires an unembedding step
-        resid = self.mlm_head(resid)
-        logits = self.unembed(resid)
+        else:
+            #  MLM requires an unembedding step
+            resid = self.mlm_head(resid)
+            logits = self.unembed(resid)
 
         if return_type == "predictions":
             assert (

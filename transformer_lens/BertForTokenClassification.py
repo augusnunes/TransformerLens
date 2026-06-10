@@ -161,7 +161,7 @@ class BertForTokenClassification:
             AssertionError: If using string input without a tokenizer
         """
 
-        if isinstance(input, list):
+        if isinstance(input, str):
             assert self.model.tokenizer is not None, "Must provide a tokenizer if input is a string"
             tokens, token_type_ids_from_tokenizer, attention_mask = self.to_tokens(input)
 

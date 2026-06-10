@@ -19,6 +19,7 @@ from transformers import (
     AutoModel,
     AutoModelForCausalLM,
     BertForPreTraining,
+    AutoModelForTokenClassification,
     HubertModel,
     T5ForConditionalGeneration,
     Wav2Vec2Model,
@@ -155,6 +156,14 @@ def convert_hf_model_config(model_name: str, **kwargs: Any) -> dict[str, Any]:
         architecture = "Gemma2ForCausalLM"
     elif "gemma" in official_model_name.lower():
         architecture = "GemmaForCausalLM"
+    elif "augusto" in official_model_name.lower():
+        huggingface_token = os.environ.get("HF_TOKEN", "")
+        hf_config = AutoConfig.from_pretrained(
+            official_model_name,
+            token=huggingface_token if len(huggingface_token) > 0 else None,
+            **kwargs,
+        )
+        architecture = hf_config.architectures[0]
     else:
         huggingface_token = os.environ.get("HF_TOKEN", "")
         hf_config = AutoConfig.from_pretrained(
@@ -1907,6 +1916,21 @@ def get_pretrained_state_dict(
             huggingface_token = os.environ.get("HF_TOKEN", "")
             if official_model_name in NON_HF_HOSTED_MODEL_NAMES:
                 raise NotImplementedError("Model not hosted on HuggingFace, must pass in hf_model")
+            elif "augusto" in official_model_name.lower():
+                print(f"official_name: {official_model_name}")
+                
+                if cfg.original_architecture == "BertForMaskedLM":
+                    state_dict = convert_bert_weights(hf_model, cfg)
+                elif cfg.original_architecture == "BertForTokenClassification":
+                    hf_model = AutoModelForTokenClassification(
+                        official_model_name,
+                        dtype=dtype,
+                        token=huggingface_token if len(huggingface_token) > 0 else None,
+                        **kwargs,
+                    )
+                    state_dict = convert_bert_weights(hf_model, cfg)
+                else:
+                    pass
             elif "hubert" in official_model_name:
                 hf_model = HubertModel.from_pretrained(
                     official_model_name,
@@ -1921,13 +1945,13 @@ def get_pretrained_state_dict(
                     token=huggingface_token if len(huggingface_token) > 0 else None,
                     **kwargs,
                 )
-            elif "bert" in official_model_name:
-                hf_model = BertForPreTraining.from_pretrained(
-                    official_model_name,
-                    dtype=dtype,
-                    token=huggingface_token if len(huggingface_token) > 0 else None,
-                    **kwargs,
-                )
+            # elif "bert" in official_model_name:
+            #     hf_model = BertForPreTraining.from_pretrained(
+            #         official_model_name,
+            #         dtype=dtype,
+            #         token=huggingface_token if len(huggingface_token) > 0 else None,
+            #         **kwargs,
+            #     )
             elif "t5" in official_model_name:
                 hf_model = T5ForConditionalGeneration.from_pretrained(
                     official_model_name,
@@ -1944,30 +1968,31 @@ def get_pretrained_state_dict(
                     **kwargs,
                 )
             else:
+                pass
                 # Older models may lack pad_token_id (required in newer transformers)
-                try:
-                    hf_model = AutoModelForCausalLM.from_pretrained(
-                        official_model_name,
-                        dtype=dtype,
-                        token=huggingface_token if len(huggingface_token) > 0 else None,
-                        **kwargs,
-                    )
-                except AttributeError as e:
-                    if "pad_token_id" in str(e):
-                        hf_config = AutoConfig.from_pretrained(
-                            official_model_name,
-                            token=huggingface_token if len(huggingface_token) > 0 else None,
-                        )
-                        hf_config.pad_token_id = getattr(hf_config, "pad_token_id", None)
-                        hf_model = AutoModelForCausalLM.from_pretrained(
-                            official_model_name,
-                            config=hf_config,
-                            dtype=dtype,
-                            token=huggingface_token if len(huggingface_token) > 0 else None,
-                            **kwargs,
-                        )
-                    else:
-                        raise
+                # try:
+                #     hf_model = AutoModelForCausalLM.from_pretrained(
+                #         official_model_name,
+                #         dtype=dtype,
+                #         token=huggingface_token if len(huggingface_token) > 0 else None,
+                #         **kwargs,
+                #     )
+                # except AttributeError as e:
+                #     if "pad_token_id" in str(e):
+                #         hf_config = AutoConfig.from_pretrained(
+                #             official_model_name,
+                #             token=huggingface_token if len(huggingface_token) > 0 else None,
+                #         )
+                #         hf_config.pad_token_id = getattr(hf_config, "pad_token_id", None)
+                #         hf_model = AutoModelForCausalLM.from_pretrained(
+                #             official_model_name,
+                #             config=hf_config,
+                #             dtype=dtype,
+                #             token=huggingface_token if len(huggingface_token) > 0 else None,
+                #             **kwargs,
+                #         )
+                #     else:
+                #         raise
 
             # Load model weights, and fold in layer norm weights
             if hf_model is not None:
@@ -1996,6 +2021,8 @@ def get_pretrained_state_dict(
         elif cfg.original_architecture == "HubertForCTC":
             state_dict = convert_hubert_weights(hf_model, cfg)
         elif cfg.original_architecture == "BertForMaskedLM":
+            state_dict = convert_bert_weights(hf_model, cfg)
+        elif cfg.original_architecture == "BertForTokenClassification":
             state_dict = convert_bert_weights(hf_model, cfg)
         elif cfg.original_architecture == "T5ForConditionalGeneration":
             state_dict = convert_t5_weights(hf_model, cfg)

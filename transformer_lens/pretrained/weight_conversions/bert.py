@@ -54,8 +54,8 @@ def convert_bert_weights(bert, cfg: HookedTransformerConfig):
 
     if cfg.encoder_task == "classification":
         classifier = bert.classifier
-        state_dict["classifier.W"] = classifier.dense.weight.T
-        state_dict["classifier.b"] = classifier.dense.bias
+        state_dict["classifier.W"] = classifier.weight.T
+        state_dict["classifier.b"] = classifier.bias
         
     else:
         pooler = bert.bert.pooler
