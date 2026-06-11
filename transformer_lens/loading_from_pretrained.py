@@ -30,6 +30,7 @@ from transformer_lens.config.hooked_transformer_config import HookedTransformerC
 from transformer_lens.pretrained.weight_conversions import (
     convert_apertus_weights,
     convert_bert_weights,
+    convert_roberta_weights,
     convert_bloom_weights,
     convert_coder_weights,
     convert_gemma_weights,
@@ -607,7 +608,40 @@ def convert_hf_model_config(model_name: str, **kwargs: Any) -> dict[str, Any]:
             "act_fn": "gelu",
             "attention_dir": "bidirectional",
         }
+    #TODO bert, roberta e xlmroberta follow the same cfg_dict
     elif architecture == "BertForTokenClassification":
+        cfg_dict = {
+            "d_model": hf_config.hidden_size,
+            "d_head": hf_config.hidden_size // hf_config.num_attention_heads,
+            "n_heads": hf_config.num_attention_heads,
+            "d_mlp": hf_config.intermediate_size,
+            "n_layers": hf_config.num_hidden_layers,
+            "n_ctx": hf_config.max_position_embeddings,
+            "eps": hf_config.layer_norm_eps,
+            "d_vocab": hf_config.vocab_size,
+            "act_fn": "gelu",
+            "attention_dir": "bidirectional",
+            "n_class": len(hf_config.label2id),
+            "label2id": hf_config.label2id,
+            "id2label": hf_config.id2label,
+        }
+    elif architecture == "RobertaForTokenClassification":
+        cfg_dict = {
+            "d_model": hf_config.hidden_size,
+            "d_head": hf_config.hidden_size // hf_config.num_attention_heads,
+            "n_heads": hf_config.num_attention_heads,
+            "d_mlp": hf_config.intermediate_size,
+            "n_layers": hf_config.num_hidden_layers,
+            "n_ctx": hf_config.max_position_embeddings,
+            "eps": hf_config.layer_norm_eps,
+            "d_vocab": hf_config.vocab_size,
+            "act_fn": "gelu",
+            "attention_dir": "bidirectional",
+            "n_class": len(hf_config.label2id),
+            "label2id": hf_config.label2id,
+            "id2label": hf_config.id2label,
+        }
+    elif architecture == "XLMRobertaForTokenClassification":
         cfg_dict = {
             "d_model": hf_config.hidden_size,
             "d_head": hf_config.hidden_size // hf_config.num_attention_heads,
@@ -1929,6 +1963,22 @@ def get_pretrained_state_dict(
                         **kwargs,
                     )
                     state_dict = convert_bert_weights(hf_model, cfg)
+                elif cfg.original_architecture == "RobertaForTokenClassification":
+                    hf_model = AutoModelForTokenClassification(
+                        official_model_name,
+                        dtype=dtype,
+                        token=huggingface_token if len(huggingface_token) > 0 else None,
+                        **kwargs,
+                    )
+                    state_dict = convert_roberta_weights(hf_model, cfg)
+                elif cfg.original_architecture == "XLMRobertaForTokenClassification":
+                    hf_model = AutoModelForTokenClassification(
+                        official_model_name,
+                        dtype=dtype,
+                        token=huggingface_token if len(huggingface_token) > 0 else None,
+                        **kwargs,
+                    )
+                    state_dict = convert_roberta_weights(hf_model, cfg)
                 else:
                     pass
             elif "hubert" in official_model_name:

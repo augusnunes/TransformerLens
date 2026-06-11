@@ -1,4 +1,5 @@
 from .bert import convert_bert_weights
+from .roberta import convert_roberta_weights
 from .bloom import convert_bloom_weights
 from .coder import convert_coder_weights
 from .gemma import convert_gemma_weights
