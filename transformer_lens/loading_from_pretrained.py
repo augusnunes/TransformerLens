@@ -2074,6 +2074,10 @@ def get_pretrained_state_dict(
             state_dict = convert_bert_weights(hf_model, cfg)
         elif cfg.original_architecture == "BertForTokenClassification":
             state_dict = convert_bert_weights(hf_model, cfg)
+        elif cfg.original_architecture == "RobertaForTokenClassification":
+            state_dict = convert_roberta_weights(hf_model, cfg)
+        elif cfg.original_architecture == "XLMRobertaForTokenClassification":
+            state_dict = convert_roberta_weights(hf_model, cfg)
         elif cfg.original_architecture == "T5ForConditionalGeneration":
             state_dict = convert_t5_weights(hf_model, cfg)
         elif cfg.original_architecture == "MistralForCausalLM":

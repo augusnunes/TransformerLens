@@ -1,5 +1,5 @@
 import einops
-
+import torch
 from transformer_lens.config.hooked_transformer_config import HookedTransformerConfig
 
 
@@ -8,7 +8,11 @@ def convert_roberta_weights(roberta, cfg: HookedTransformerConfig):
     state_dict = {
         "embed.embed.W_E": embeddings.word_embeddings.weight,
         "embed.pos_embed.W_pos": embeddings.position_embeddings.weight,
-        "embed.token_type_embed.W_token_type": embeddings.token_type_embeddings.weight,
+        # Roberta dont uses token_type, they are initialized with zeros to usa HookedEncoder
+        "embed.token_type_embed.W_token_type": torch.nn.Parameter(
+            torch.zeros(2, cfg.d_model, dtype=cfg.dtype)
+        ),
+        # "embed.token_type_embed.W_token_type": embeddings.token_type_embeddings.weight,
         "embed.ln.w": embeddings.LayerNorm.weight,
         "embed.ln.b": embeddings.LayerNorm.bias,
     }
