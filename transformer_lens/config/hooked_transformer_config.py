@@ -297,7 +297,7 @@ class HookedTransformerConfig(TransformerLensConfig):
     n_class: int = 2
     id2label: Optional[Dict] = None
     label2id: Optional[Dict] = None
-    encoder_task: Literal["classification", "nsp"] = "classification"
+    encoder_task: Literal["classification", "none","nsp"] = "none"
 
     def __post_init__(self):
         # Call parent's post_init first

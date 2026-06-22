@@ -65,7 +65,8 @@ def convert_roberta_weights(roberta, cfg: HookedTransformerConfig):
         classifier = roberta.classifier
         state_dict["classifier.W"] = classifier.weight.T
         state_dict["classifier.b"] = classifier.bias
-        
+    elif cfg.encoder_task == "none":
+        return state_dict
     # TODO
     # else:
     #     pooler = roberta.pooler
